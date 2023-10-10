@@ -2,28 +2,38 @@ import pygame as pg
 from settings import *
 from support import *
 
-class Player(pg.sprite.Sprite):
-    def __init__(self,pos,group):
-        super().__init__(group)
+class Player():
+    def __init__(self,x,y,width,height,color):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.color = color
 
-        self.pos = pos
-        self.image = loadSprite("Sprites/Player/Idle/00.png",(350,250)).convert_alpha()
-        self.rect = self.image.get_rect(topleft=pos)
-        self.hitbox = self.rect.inflate(0,0)
+        self.speed = 1
 
+        self.rect = (x,y,width,height)
 
-    def importSprites(self):
-        spritePath = "Sprites/Player/"
-        self.animations = { "idle": []}
+    def draw(self,window):
+        pg.draw.rect(window,self.color,self.rect)
 
     def getInputs(self):
         keys = pg.key.get_pressed()
-        if keys[pg.K_a]:
-            self.image = pg.transform.flip(self.image, True, False).convert_alpha()
 
+        if keys[pg.K_w]:
+            self.y -= self.speed
+
+
+        elif keys[pg.K_s]:
+            self.y += self.speed
+
+        elif keys[pg.K_a]:
+            self.x -= self.speed
 
         elif keys[pg.K_d]:
-            self.image = pg.transform.flip(self.image, False, False).convert_alpha()
+            self.x += self.speed
+
+        self.rect = (self.x,self.y,self.width,self.height)
 
     def update(self):
         self.getInputs()

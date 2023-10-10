@@ -1,32 +1,29 @@
 import pygame as pg
 from settings import *
-from level import Level
-import sys
+from player import Player
 
-class Main:
-    def __init__(self):
-        pg.init()
+window = pg.display.set_mode((screenWidth,screenHeight))
+pg.display.set_caption("Client")
 
-        self.gameRunning = True
-        self.screen = pg.display.set_mode((screenWidth,screenHeight))
-        pg.display.set_caption("Mortal Kombat")
-        self.clock = pg.time.Clock()
-        self.level = Level()
+client = 0
 
-    def run(self):
-        while self.gameRunning:
-            for event in pg.event.get():
-                if event.type == pg.QUIT:
-                    pg.quit()
-                    sys.exit()
+def redrawWindow(player):
+    window.fill((255,255,255))
+    player.draw(window)
+    pg.display.update()
 
-            self.screen.fill("black")
-            self.level.update()
-            pg.display.update()
-            self.clock.tick(FPS)
+def main():
+    run = True
+    player = Player(100,100,100,100,(0,255,0))
+    while run:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                run = False
+                print("this")
+                pg.quit()
 
 
-game = Main()
-game.run()
+        player.update()
+        redrawWindow(player)
 
-
+main()
