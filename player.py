@@ -18,20 +18,22 @@ class Player():
         pg.draw.rect(window,self.color,self.rect)
 
     def getInputs(self):
-        keys = pg.key.get_pressed()
+        try:
+            keys = pg.key.get_pressed()
 
-        if keys[pg.K_w]:
-            self.y -= self.speed
+            if keys[pg.K_w]:
+                self.y -= self.speed
 
 
-        elif keys[pg.K_s]:
-            self.y += self.speed
+            elif keys[pg.K_s]:
+                self.y += self.speed
 
-        elif keys[pg.K_a]:
-            self.x -= self.speed
+            elif keys[pg.K_a]:
+                self.x -= self.speed
 
-        elif keys[pg.K_d]:
-            self.x += self.speed
+            elif keys[pg.K_d]:
+                self.x += self.speed
+        except: pass
 
         self.rect = (self.x,self.y,self.width,self.height)
 
