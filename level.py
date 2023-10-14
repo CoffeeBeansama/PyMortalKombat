@@ -8,12 +8,12 @@ class Level:
         self.screen = pg.display.get_surface()
         self.visibleSprites = pg.sprite.Group()
         self.netWork = Network()
-        self.player1 = self.netWork.getPlayer()
+        self.player1Data = self.netWork.getPlayer()
 
-    def redrawWindow(self,player, player2):
+    def redrawWindow(self,player1, player2):
         self.screen.fill((255, 255, 255))
-        player.draw(self.screen)
-        player2.draw(self.screen)
+        print(f"from player1: {player1}")
+        print(f"from player2: {player2}")
         pg.display.update()
 
 
@@ -21,7 +21,5 @@ class Level:
         for sprites in self.visibleSprites:
             self.screen.blit(sprites.image,sprites.pos)
 
-        self.player2 = self.netWork.send(self.player1)
-        self.player1.update()
-        self.player2.update()
-        self.redrawWindow(self.player1,self.player2)
+        self.player2Data = self.netWork.send(self.player1Data)
+        self.redrawWindow(self.player1Data,self.player2Data)
