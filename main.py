@@ -8,7 +8,7 @@ from level import Level
 class Game:
     def __init__(self):
         self.window = pg.display.set_mode((screenWidth,screenHeight))
-        pg.display.set_caption("Client")
+        pg.display.set_caption("PyMortalKombat")
         self.running = True
         self.level = Level()
         self.clock = pg.time.Clock()

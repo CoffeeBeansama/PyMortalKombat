@@ -16,7 +16,7 @@ except socket.error as e:
 s.listen()
 print("Waiting for connection...Server started!")
 
-players = [PlayerData(0, 0 ), PlayerData(100, 100)]
+players = [PlayerData(0, 0 ), PlayerData(600, 0)]
 
 gameIdCount = 0
 

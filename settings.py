@@ -1,4 +1,4 @@
-screenWidth = 500
-screenHeight = 500
+screenWidth = 1000
+screenHeight = 350
 
 FPS = 60
