@@ -1,6 +1,6 @@
 import pygame as pg
 from settings import *
-from player import Player
+from playerdata import *
 from network import Network
 
 class Level:
@@ -10,16 +10,24 @@ class Level:
         self.netWork = Network()
         self.player1Data = self.netWork.getPlayer()
 
+        self.player1 = Player((0,0),[self.visibleSprites])
+        self.player2 = Player((100,100),[self.visibleSprites])
+
+
     def redrawWindow(self,player1, player2):
-        self.screen.fill((255, 255, 255))
-        print(f"from player1: {player1}")
-        print(f"from player2: {player2}")
+        self.screen.fill((0, 0, 0))
+        for sprites in self.visibleSprites:
+            self.screen.blit(sprites.image,sprites.rect.center)
         pg.display.update()
 
 
     def update(self):
-        for sprites in self.visibleSprites:
-            self.screen.blit(sprites.image,sprites.pos)
-
         self.player2Data = self.netWork.send(self.player1Data)
-        self.redrawWindow(self.player1Data,self.player2Data)
+
+        self.player1Data.getInputs()
+        self.player2Data.getInputs()
+
+        self.player1.update(self.player1Data.getPos()[0],self.player1Data.getPos()[1])
+        self.player2.update(self.player2Data.getPos()[0],self.player2Data.getPos()[1])
+
+        self.redrawWindow(self.player1,self.player2)

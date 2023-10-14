@@ -1,6 +1,6 @@
 import pygame as pg
 from settings import *
-from player import Player
+from playerdata import *
 from network import Network
 from level import Level
 
