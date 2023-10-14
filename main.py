@@ -4,24 +4,27 @@ from player import Player
 from network import Network
 from level import Level
 
-window = pg.display.set_mode((screenWidth,screenHeight))
-pg.display.set_caption("Client")
 
-def main():
-    run = True
-    level = Level()
-    clock = pg.time.Clock()
-    while run:
-        clock.tick(FPS)
+class Game:
+    def __init__(self):
+        self.window = pg.display.set_mode((screenWidth,screenHeight))
+        pg.display.set_caption("Client")
+        self.running = True
+        self.level = Level()
+        self.clock = pg.time.Clock()
 
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                run = False
-                pg.quit()
+    def run(self):
+        while self.running:
+            self.clock.tick(FPS)
 
-        level.update()
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    self.running = False
+                    pg.quit()
+
+            self.level.update()
 
 
 
-
-main()
+game = Game()
+game.run()

@@ -13,11 +13,13 @@ try:
 except socket.error as e:
     print(e)
 
-s.listen(2)
+s.listen()
 print("Waiting for connection...Server started!")
 
 
 players = [Player(0,0,100,100,(0,255,0)),Player(100,100,100,100,(0,0,0))]
+gameIdCount = 0
+
 
 def threadedClient(conn,player):
     conn.send(pickle.dumps(players[player]))
@@ -48,15 +50,13 @@ def threadedClient(conn,player):
 currentPlayers = 0
 while True:
     conn,addr = s.accept()
-    print("this")
-    print(f"Connected to: {addr}")
-
     start_new_thread(threadedClient,(conn,currentPlayers))
-
-
     currentPlayers += 1
+    if currentPlayers >= 3:
+        currentPlayers -= 1
 
-    print(currentPlayers)
+
+
 
 
 

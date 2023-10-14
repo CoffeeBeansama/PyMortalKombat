@@ -11,13 +11,11 @@ class Level:
         self.player1 = self.netWork.getPlayer()
 
     def redrawWindow(self,player, player2):
-        try:
-            self.screen.fill((255, 255, 255))
-            player.draw(self.screen)
-            player2.draw(self.screen)
-            pg.display.update()
-        except:
-            pass
+        self.screen.fill((255, 255, 255))
+        player.draw(self.screen)
+        player2.draw(self.screen)
+        pg.display.update()
+
 
     def update(self):
         for sprites in self.visibleSprites:
