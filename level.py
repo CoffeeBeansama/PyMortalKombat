@@ -1,6 +1,8 @@
 import pygame as pg
 from player import Player
 from network import Network
+from support import loadSprite
+from settings import screenWidth,screenHeight
 import ast
 
 #region Camera
@@ -11,12 +13,15 @@ class CameraGroup(pg.sprite.Group):
         self.half_width = self.display_canvas.get_size()[0] // 2
         self.half_height = self.display_canvas.get_size()[1] // 2
 
+        self.backgroundSprite = loadSprite("Sprites/Background.png",(500,300))
 
-        self.internalSurfaceSize = (500, 500)
+        self.backgroundRect = self.backgroundSprite.get_rect(topleft=(0,0))
+
+        self.internalSurfaceSize = (400, 500)
         self.internalSurface = pg.Surface(self.internalSurfaceSize, pg.SRCALPHA)
         self.internalRect = self.internalSurface.get_rect(center=(self.half_width, self.half_height))
         self.offset_rect = None
-        self.zoomInSize = (1100, 1100)
+        self.zoomInSize = (800, 750)
 
         self.internalOffset = pg.math.Vector2()
         self.internalOffset.x = self.internalSurfaceSize[0] // 2 - self.half_width
@@ -28,11 +33,12 @@ class CameraGroup(pg.sprite.Group):
 
     def custom_draw(self, player):
         # getting the offset  for camera
-        self.offset.x = player.rect.centerx - self.half_width
-        self.offset.y = player.rect.centery - self.half_height
+        self.offset.x = 250- self.half_width
+        self.offset.y = 180 - self.half_height
 
         self.internalSurface.fill("black")
-
+        backgroundPos = self.backgroundRect.topleft - self.offset + self.internalOffset
+        self.internalSurface.blit(self.backgroundSprite.convert_alpha(),backgroundPos)
 
         for sprite in sorted(self.sprites(), key=lambda sprite: sprite.rect.centery):
             self.offset_rect = sprite.rect.topleft - self.offset + self.internalOffset
@@ -60,8 +66,8 @@ class Level:
 
         self.visibleSprites = CameraGroup()
 
-        p1Pos = (100,100)
-        p2Pos = (150,100)
+        p1Pos = (250,175)
+        p2Pos = (270,175)
 
         self.player = Player(p1Pos if self.playerID == 0  else p2Pos,self.visibleSprites)
         self.player2 = Player(p2Pos if self.playerID == 0 else p1Pos,self.visibleSprites)
