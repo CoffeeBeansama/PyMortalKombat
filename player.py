@@ -30,6 +30,8 @@ class Player(pg.sprite.Sprite):
 
         }
 
+        self.flipped = True
+
     def handleMovement(self, direction):
         self.hitbox.x += direction[0] * self.speed
         self.hitbox.y += direction[1] * self.speed
@@ -45,38 +47,35 @@ class Player(pg.sprite.Sprite):
             fullPath = self.spritePath + animations
             self.animationStates[animations] = import_folder(fullPath)
 
-    def handlePlayer2Movement(self,pos,direction):
+    def handlePlayer2Movement(self,pos,direction,state,flipped):
         idle = direction == (0.0,0.0)
+        self.flipped = flipped
         if not idle:
             if direction[0] < 0:
                 self.state = "Left"
             elif direction[1] < 1:
                 self.state = "Up"
         else:
-            if not "idle" in self.state:
-                self.state = f"{self.state}_idle"
+            
+            if self.state != "Idle":
+                self.state = "Idle"
 
-        self.rect.center = pos
+        self.hitbox.center = pos
+        self.rect.center = self.hitbox.center
+        self.state = state
+        self.handleAnimation()
+    
 
-    def getInputs(self):
-        keys = pg.key.get_pressed()
+    
 
-        if keys[pg.K_w]:
-            self.handleVerticalDirection(-1,"Up")
-        elif keys[pg.K_s]:
-            self.handleVerticalDirection(1,"Down")
-        elif keys[pg.K_a]:
-            self.handleHorizontalDirection(-1,"Left")
-        elif keys[pg.K_d]:
-            self.handleHorizontalDirection(1,"Right")
-        else:
-            self.idleState()
-
-    def handleHorizontalDirection(self,x,state):
+    def handleHorizontalDirection(self,x,flipped):
         self.direction.x = x
         self.direction.y = 0
-        self.state = state
+        self.flipped = flipped
+        self.state = "Walk"
+        
 
+        
     def handleAnimation(self):
         animation = self.animationStates[self.state]
         self.frame_index += self.walkingAnimationTime
@@ -85,30 +84,32 @@ class Player(pg.sprite.Sprite):
             self.frame_index = 0 
 
         self.image = animation[int(self.frame_index)].convert_alpha()
+        self.image =  pg.transform.flip(self.image, True, False) if self.flipped else pg.transform.flip(self.image, False, False)
         self.rect = self.image.get_rect(center=self.hitbox.center)
 
     def idleState(self):
         self.direction.x = 0
         self.direction.y = 0
-
-        if not "idle" in self.state:
-            self.state = f"{self.state}_idle"
+        self.state = "Idle"
 
     def handleInputs(self):
         keys = pg.key.get_pressed()
        
         if keys[pg.K_a]:
-            self.handleHorizontalDirection(-1,"Left")
+            self.handleHorizontalDirection(-1,True)
         elif keys[pg.K_d]:
-            self.handleHorizontalDirection(1,"Right")
+            self.handleHorizontalDirection(1,False)
         else:
-            self.direction.y = 0
-            self.direction.x = 0
+            self.idleState()
+
 
     def update(self):
         self.data["Pos"] = self.rect.center
         self.data["Direction"] = (self.direction.x,self.direction.y)
+        self.data["State"] = self.state
+        self.data["Flipped"] = self.flipped
         self.handleInputs()
+        self.handleAnimation()
         self.handleMovement(self.direction)
 
 

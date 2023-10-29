@@ -33,7 +33,7 @@ class CameraGroup(pg.sprite.Group):
 
     def custom_draw(self, player):
         # getting the offset  for camera
-        self.offset.x = 250- self.half_width
+        self.offset.x = 250 - self.half_width
         self.offset.y = 180 - self.half_height
 
         self.internalSurface.fill("black")
@@ -76,6 +76,7 @@ class Level:
              "Player" : self.player.data
         }
 
+
     def update(self):
         self.game = self.network.send("get")
     
@@ -86,18 +87,23 @@ class Level:
 
         self.visibleSprites.custom_draw(self.player)
         
+         
         try:
             match self.playerID:
                 case 0:
-                        
-                        data = ast.literal_eval(str(self.game.getPlayerTwoData()))
-                        self.player2.handlePlayer2Movement(data["Player"]["Pos"],data["Player"]["Direction"])
+                        if type(self.game.getPlayerTwoPos()) == str:
+                            data = ast.literal_eval(str(self.game.getPlayerTwoData()))
+                            playerData = data["Player"]
+                            self.player2.handlePlayer2Movement(playerData["Pos"],playerData["Direction"],playerData["State"],playerData["Flipped"])
+                       
+                             
                 case 1:
-                        
-                        data = ast.literal_eval(str(self.game.getPlayerOneData()))
-                        self.player2.handlePlayer2Movement(data["Player"]["Pos"],data["Player"]["Direction"])
+                        if type(self.game.getPlayerOneData()) == str:
+                            data = ast.literal_eval(str(self.game.getPlayerOneData()))
+                            playerData = data["Player"]
+                            self.player2.handlePlayer2Movement(playerData["Pos"],playerData["Direction"],playerData["State"],playerData["Flipped"])
         except:
-             return     
+            pass
                   
         
         
