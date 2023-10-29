@@ -1,33 +1,105 @@
 import pygame as pg
-from settings import *
-from playerdata import *
+from player import Player
 from network import Network
+from support import loadSprite
+from settings import screenWidth,screenHeight
+import ast
+
+#region Camera
+class CameraGroup(pg.sprite.Group):
+    def __init__(self):
+        super().__init__()
+        self.display_canvas = pg.display.get_surface()
+        self.half_width = self.display_canvas.get_size()[0] // 2
+        self.half_height = self.display_canvas.get_size()[1] // 2
+
+        self.backgroundSprite = loadSprite("Sprites/Background.png",(500,300))
+
+        self.backgroundRect = self.backgroundSprite.get_rect(topleft=(0,0))
+
+        self.internalSurfaceSize = (400, 500)
+        self.internalSurface = pg.Surface(self.internalSurfaceSize, pg.SRCALPHA)
+        self.internalRect = self.internalSurface.get_rect(center=(self.half_width, self.half_height))
+        self.offset_rect = None
+        self.zoomInSize = (800, 750)
+
+        self.internalOffset = pg.math.Vector2()
+        self.internalOffset.x = self.internalSurfaceSize[0] // 2 - self.half_width
+        self.internalOffset.y = self.internalSurfaceSize[1] // 2 - self.half_height
+
+        self.offset = pg.math.Vector2()
+
+        
+
+    def custom_draw(self, player):
+        # getting the offset  for camera
+        self.offset.x = 250- self.half_width
+        self.offset.y = 180 - self.half_height
+
+        self.internalSurface.fill("black")
+        backgroundPos = self.backgroundRect.topleft - self.offset + self.internalOffset
+        self.internalSurface.blit(self.backgroundSprite.convert_alpha(),backgroundPos)
+
+        for sprite in sorted(self.sprites(), key=lambda sprite: sprite.rect.centery):
+            self.offset_rect = sprite.rect.topleft - self.offset + self.internalOffset
+
+            self.internalSurface.blit(sprite.image, self.offset_rect)
+
+
+        scaledSurface = pg.transform.scale(self.internalSurface, self.zoomInSize)
+        scaledRect = scaledSurface.get_rect(center=(self.half_width, self.half_height))
+        self.display_canvas.blit(scaledSurface, scaledRect)
+
+#endregion
+
 
 class Level:
     def __init__(self):
         self.screen = pg.display.get_surface()
-        self.visibleSprites = pg.sprite.Group()
-        self.netWork = Network()
-        self.player1Data = self.netWork.getPlayer()
 
-        self.player1 = Player((0,0),[self.visibleSprites])
-        self.player2 = Player((600,0),[self.visibleSprites])
+        self.network = Network()
 
+        try:
+            self.playerID = int(self.network.getPlayerID())
+        except:
+            pass
 
-    def redrawWindow(self,player1, player2):
-        self.screen.fill((0, 0, 0))
-        for sprites in self.visibleSprites:
-            self.screen.blit(sprites.image,sprites.rect.center)
-        pg.display.update()
+        self.visibleSprites = CameraGroup()
 
+        p1Pos = (250,175)
+        p2Pos = (270,175)
+
+        self.player = Player(p1Pos if self.playerID == 0  else p2Pos,self.visibleSprites)
+        self.player2 = Player(p2Pos if self.playerID == 0 else p1Pos,self.visibleSprites)
+
+        self.gameData = {
+             "Player" : self.player.data
+        }
 
     def update(self):
-        self.player2Data = self.netWork.send(self.player1Data)
+        self.game = self.network.send("get")
+    
+        self.player.update()
+        self.gameData["Player"] = self.player.data
 
-        self.player1Data.update()
-        self.player2Data.update()
+        self.network.send(str(self.gameData))
 
-        self.player1.update(self.player1Data.getPos()[0],self.player1Data.getPos()[1],self.player1Data.frameIndex)
-        self.player2.update(self.player2Data.getPos()[0],self.player2Data.getPos()[1],self.player2Data.frameIndex)
-
-        self.redrawWindow(self.player1,self.player2)
+        self.visibleSprites.custom_draw(self.player)
+        
+        try:
+            match self.playerID:
+                case 0:
+                        
+                        data = ast.literal_eval(str(self.game.getPlayerTwoData()))
+                        self.player2.handlePlayer2Movement(data["Player"]["Pos"],data["Player"]["Direction"])
+                case 1:
+                        
+                        data = ast.literal_eval(str(self.game.getPlayerOneData()))
+                        self.player2.handlePlayer2Movement(data["Player"]["Pos"],data["Player"]["Direction"])
+        except:
+             return     
+                  
+        
+        
+        
+        
