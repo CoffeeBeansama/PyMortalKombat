@@ -1,6 +1,7 @@
 import pygame as pg
 from settings import *
 from support import *
+from timer import Timer
 
 class Player(pg.sprite.Sprite):
     def __init__(self,pos,group):
@@ -19,6 +20,7 @@ class Player(pg.sprite.Sprite):
         self.direction = pg.math.Vector2()
 
         self.walkingAnimationTime = 1 / 8
+        self.attackAnimationTime = 1 / 8
         self.frame_index = 0
 
         self.state = "Idle"
@@ -31,6 +33,8 @@ class Player(pg.sprite.Sprite):
         }
 
         self.flipped = True
+        self.attacking = False
+        self.timer = Timer(200)
 
     def handleMovement(self, direction):
         self.hitbox.x += direction[0] * self.speed
@@ -78,32 +82,47 @@ class Player(pg.sprite.Sprite):
         
     def handleAnimation(self):
         animation = self.animationStates[self.state]
-        self.frame_index += self.walkingAnimationTime
+        self.frame_index += self.walkingAnimationTime if not self.attacking else self.attackAnimationTime
 
         if self.frame_index >= len(animation):
-            self.frame_index = 0 
+            self.frame_index = 0 if not self.attacking else len(animation) -1
+            if self.attacking:
+                self.attacking = False
 
         self.image = animation[int(self.frame_index)].convert_alpha()
         self.image =  pg.transform.flip(self.image, True, False) if self.flipped else pg.transform.flip(self.image, False, False)
         self.rect = self.image.get_rect(center=self.hitbox.center)
 
     def idleState(self):
-        self.direction.x = 0
-        self.direction.y = 0
-        self.state = "Idle"
+        if not self.attacking:
+            self.direction.x = 0
+            self.direction.y = 0
+            self.state = "Idle"
 
     def handleInputs(self):
         keys = pg.key.get_pressed()
-       
-        if keys[pg.K_a]:
-            self.handleHorizontalDirection(-1,True)
-        elif keys[pg.K_d]:
-            self.handleHorizontalDirection(1,False)
-        else:
-            self.idleState()
+        
+        if not self.attacking:
+            if keys[pg.K_a]:
+                self.handleHorizontalDirection(-1,True)
+            elif keys[pg.K_d]:
+                self.handleHorizontalDirection(1,False)
+            else:
+                self.idleState()
 
+        if not self.timer.activated and not self.attacking:
+            if keys[pg.K_SPACE]:
+                self.attackState()
+                self.timer.activate()
+
+    def attackState(self):
+        self.frame_index = 0
+        self.state = "Attack1"
+        self.attacking = True
 
     def update(self):
+
+        self.timer.update()
         self.data["Pos"] = self.rect.center
         self.data["Direction"] = (self.direction.x,self.direction.y)
         self.data["State"] = self.state
@@ -111,6 +130,7 @@ class Player(pg.sprite.Sprite):
         self.handleInputs()
         self.handleAnimation()
         self.handleMovement(self.direction)
+       
 
 
 

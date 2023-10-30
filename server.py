@@ -42,7 +42,6 @@ class Server:
                         break
                     else:
                         if data != "get":
-                           print(data)
                            match player:
                                case 0:    
                                    game.updatePlayerOneData(data)

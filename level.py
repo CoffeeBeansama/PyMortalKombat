@@ -86,17 +86,15 @@ class Level:
         self.network.send(str(self.gameData))
 
         self.visibleSprites.custom_draw(self.player)
-        
-         
+    
         try:
             match self.playerID:
                 case 0:
-                        if type(self.game.getPlayerTwoPos()) == str:
+                        if type(self.game.getPlayerTwoData()) == str:
                             data = ast.literal_eval(str(self.game.getPlayerTwoData()))
                             playerData = data["Player"]
                             self.player2.handlePlayer2Movement(playerData["Pos"],playerData["Direction"],playerData["State"],playerData["Flipped"])
                        
-                             
                 case 1:
                         if type(self.game.getPlayerOneData()) == str:
                             data = ast.literal_eval(str(self.game.getPlayerOneData()))
