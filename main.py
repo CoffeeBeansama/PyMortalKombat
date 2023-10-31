@@ -9,7 +9,7 @@ class Game:
         
         self.running = True
         self.level = Level()
-        pg.display.set_caption(str(self.level.playerID+1))
+        pg.display.set_caption(f"Player {self.level.playerID+1}")
         self.clock = pg.time.Clock()
 
     def run(self):
@@ -21,6 +21,7 @@ class Game:
 
             self.window.fill("black")
             self.level.update()
+            self.level.displayFPS(self.clock)
             pg.display.update()
             self.clock.tick(FPS)
 

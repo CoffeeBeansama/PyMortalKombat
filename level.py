@@ -56,7 +56,7 @@ class CameraGroup(pg.sprite.Group):
 class Level:
     def __init__(self):
         self.screen = pg.display.get_surface()
-
+        pg.font.init()
         self.network = Network()
 
         try:
@@ -65,9 +65,10 @@ class Level:
             pass
 
         self.visibleSprites = CameraGroup()
+        self.font = pg.font.Font("font/DeterminationMonoWebRegular-Z5oq.ttf",18)
 
-        p1Pos = (250,175)
-        p2Pos = (270,175)
+        p1Pos = (250,225)
+        p2Pos = (270,225)
 
         self.player = Player(p1Pos if self.playerID == 0  else p2Pos,self.visibleSprites)
         self.player2 = Player(p2Pos if self.playerID == 0 else p1Pos,self.visibleSprites)
@@ -76,10 +77,16 @@ class Level:
              "Player" : self.player.data
         }
 
+    def displayFPS(self,clock):
+         
+         fps = self.font.render(f"FPS:{round(clock.get_fps())}",True,(255,255,255))
+         pos = (730,10)
+         self.screen.blit(fps,pos)
 
     def update(self):
+        
         self.game = self.network.send("get")
-    
+
         self.player.update()
         self.gameData["Player"] = self.player.data
 
@@ -93,13 +100,13 @@ class Level:
                         if type(self.game.getPlayerTwoData()) == str:
                             data = ast.literal_eval(str(self.game.getPlayerTwoData()))
                             playerData = data["Player"]
-                            self.player2.handlePlayer2Movement(playerData["Pos"],playerData["Direction"],playerData["State"],playerData["Flipped"])
+                            self.player2.handlePlayer2Movement(playerData["Pos"],playerData["Direction"],playerData["State"],playerData["Flipped"],playerData["Frame Index"],playerData["Attacking"])
                        
                 case 1:
                         if type(self.game.getPlayerOneData()) == str:
                             data = ast.literal_eval(str(self.game.getPlayerOneData()))
                             playerData = data["Player"]
-                            self.player2.handlePlayer2Movement(playerData["Pos"],playerData["Direction"],playerData["State"],playerData["Flipped"])
+                            self.player2.handlePlayer2Movement(playerData["Pos"],playerData["Direction"],playerData["State"],playerData["Flipped"],playerData["Frame Index"],playerData["Attacking"])
         except:
             pass
                   

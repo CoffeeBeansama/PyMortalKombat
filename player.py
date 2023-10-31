@@ -12,7 +12,7 @@ class Player(pg.sprite.Sprite):
         self.spritePath = "Sprites/Player/"
 
         self.importSprites()
-        self.image = loadSprite(f"Sprites/test/player.png",(10,10)).convert_alpha()
+        self.image = pg.image.load(f"Sprites/Player/Idle/player-idle1.png").convert_alpha()
         self.pos = pos
         self.rect = self.image.get_rect(topleft=pos)
         self.hitbox = self.rect.inflate(0,0)
@@ -43,7 +43,7 @@ class Player(pg.sprite.Sprite):
 
     def importSprites(self):
         self.animationStates = {
-            "Attack1": [],"Attack2": [], "Death": [] , "Idle": [],
+            "ShootIdle": [],"ShootWalk": [], "Death": [] , "Idle": [],
             "Roll": [], "Turn Around": [], "Walk": [],
         }
 
@@ -51,7 +51,7 @@ class Player(pg.sprite.Sprite):
             fullPath = self.spritePath + animations
             self.animationStates[animations] = import_folder(fullPath)
 
-    def handlePlayer2Movement(self,pos,direction,state,flipped):
+    def handlePlayer2Movement(self,pos,direction,state,flipped,frameIndex,attacking):
         idle = direction == (0.0,0.0)
         self.flipped = flipped
         if not idle:
@@ -67,16 +67,16 @@ class Player(pg.sprite.Sprite):
         self.hitbox.center = pos
         self.rect.center = self.hitbox.center
         self.state = state
+        self.frame_index = frameIndex
+        self.attacking = attacking
         self.handleAnimation()
-    
 
-    
 
     def handleHorizontalDirection(self,x,flipped):
         self.direction.x = x
         self.direction.y = 0
         self.flipped = flipped
-        self.state = "Walk"
+        self.state = "Walk" if not self.attacking else "ShootWalk"
         
 
         
@@ -84,40 +84,52 @@ class Player(pg.sprite.Sprite):
         animation = self.animationStates[self.state]
         self.frame_index += self.walkingAnimationTime if not self.attacking else self.attackAnimationTime
 
+        notMoving = self.direction.x == 0 and self.direction.y == 0
         if self.frame_index >= len(animation):
-            self.frame_index = 0 if not self.attacking else len(animation) -1
-            if self.attacking:
-                self.attacking = False
+            if notMoving and self.attacking:
+                self.frame_index = len(animation) -1
+            else:
+                self.frame_index = 0
+
+            
+                
 
         self.image = animation[int(self.frame_index)].convert_alpha()
         self.image =  pg.transform.flip(self.image, True, False) if self.flipped else pg.transform.flip(self.image, False, False)
         self.rect = self.image.get_rect(center=self.hitbox.center)
+
 
     def idleState(self):
         if not self.attacking:
             self.direction.x = 0
             self.direction.y = 0
             self.state = "Idle"
+        else:
+            self.state = "ShootIdle"
+            self.direction.x = 0
+            self.direction.y = 0
 
     def handleInputs(self):
         keys = pg.key.get_pressed()
-        
-        if not self.attacking:
-            if keys[pg.K_a]:
-                self.handleHorizontalDirection(-1,True)
-            elif keys[pg.K_d]:
-                self.handleHorizontalDirection(1,False)
-            else:
-                self.idleState()
+        mousePressed = pg.mouse.get_pressed()
 
-        if not self.timer.activated and not self.attacking:
-            if keys[pg.K_SPACE]:
-                self.attackState()
-                self.timer.activate()
+
+        if keys[pg.K_a]:
+            self.handleHorizontalDirection(-1,True)
+        elif keys[pg.K_d]:
+            self.handleHorizontalDirection(1,False)
+        else:
+            self.idleState()
+
+        
+        if mousePressed[0]:
+            self.attackState()
+        else:
+            self.attacking = False
+            
 
     def attackState(self):
-        self.frame_index = 0
-        self.state = "Attack1"
+        
         self.attacking = True
 
     def update(self):
@@ -125,8 +137,10 @@ class Player(pg.sprite.Sprite):
         self.timer.update()
         self.data["Pos"] = self.rect.center
         self.data["Direction"] = (self.direction.x,self.direction.y)
+        self.data["Frame Index"] = self.frame_index
         self.data["State"] = self.state
         self.data["Flipped"] = self.flipped
+        self.data["Attacking"] = self.attacking
         self.handleInputs()
         self.handleAnimation()
         self.handleMovement(self.direction)
