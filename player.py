@@ -4,7 +4,7 @@ from support import *
 from timer import Timer
 
 class Player(pg.sprite.Sprite):
-    def __init__(self,pos,group):
+    def __init__(self,pos,group,createBullets):
         super().__init__(group)
 
         
@@ -12,7 +12,7 @@ class Player(pg.sprite.Sprite):
         self.spritePath = "Sprites/Player/"
 
         self.importSprites()
-        self.image = pg.image.load(f"Sprites/Player/Idle/player-idle1.png").convert_alpha()
+        self.image = pg.image.load(f"{self.spritePath}Idle/player-idle1.png").convert_alpha()
         self.pos = pos
         self.rect = self.image.get_rect(topleft=pos)
         self.hitbox = self.rect.inflate(0,0)
@@ -35,6 +35,8 @@ class Player(pg.sprite.Sprite):
         self.flipped = True
         self.attacking = False
         self.timer = Timer(200)
+
+        self.createBullets = createBullets
 
     def handleMovement(self, direction):
         self.hitbox.x += direction[0] * self.speed
@@ -129,7 +131,7 @@ class Player(pg.sprite.Sprite):
             
 
     def attackState(self):
-        
+        self.createBullets()
         self.attacking = True
 
     def update(self):

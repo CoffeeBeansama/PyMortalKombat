@@ -4,6 +4,8 @@ from network import Network
 from support import loadSprite
 from settings import screenWidth,screenHeight
 import ast
+from timer import Timer
+from bullets import Bullet
 
 #region Camera
 class CameraGroup(pg.sprite.Group):
@@ -70,27 +72,42 @@ class Level:
         p1Pos = (250,225)
         p2Pos = (270,225)
 
-        self.player = Player(p1Pos if self.playerID == 0  else p2Pos,self.visibleSprites)
-        self.player2 = Player(p2Pos if self.playerID == 0 else p1Pos,self.visibleSprites)
+        self.player = Player(p1Pos if self.playerID == 0  else p2Pos,self.visibleSprites,self.createPlayerBullets)
+        self.player2 = Player(p2Pos if self.playerID == 0 else p1Pos,self.visibleSprites,self.createPlayerBullets)
 
         self.gameData = {
              "Player" : self.player.data
         }
 
+        self.bullets = []
+        self.timer = Timer(500)
+
+
+    def createPlayerBullets(self):
+         player = self.player
+         if not self.timer.activated:
+            bulletStartx = player.rect.centerx - 30 if player.flipped else  player.rect.centerx + 15
+            bulletStarty = player.rect.centery - 6
+            self.bullets.append(Bullet((bulletStartx,bulletStarty),self.visibleSprites,player.flipped))
+            print("Bullets created!")
+            self.timer.activate()
+
     def displayFPS(self,clock):
-         
          fps = self.font.render(f"FPS:{round(clock.get_fps())}",True,(255,255,255))
          pos = (730,10)
          self.screen.blit(fps,pos)
 
     def update(self):
-        
+        self.timer.update()
         self.game = self.network.send("get")
 
         self.player.update()
         self.gameData["Player"] = self.player.data
 
         self.network.send(str(self.gameData))
+
+        for bullets in self.bullets:
+            bullets.update()
 
         self.visibleSprites.custom_draw(self.player)
     
