@@ -1,6 +1,7 @@
 import pygame as pg
 from random import randint
 
+
 class Timer:
     def __init__(self,duration,function=None):
         self.duration = duration

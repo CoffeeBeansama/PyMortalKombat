@@ -80,7 +80,7 @@ class Level:
         }
 
         self.bullets = []
-        self.timer = Timer(500)
+        self.timer = Timer(200)
 
 
     def createPlayerBullets(self):
@@ -89,8 +89,9 @@ class Level:
             bulletStartx = player.rect.centerx - 30 if player.flipped else  player.rect.centerx + 15
             bulletStarty = player.rect.centery - 6
             self.bullets.append(Bullet((bulletStartx,bulletStarty),self.visibleSprites,player.flipped))
-            print("Bullets created!")
+
             self.timer.activate()
+
 
     def displayFPS(self,clock):
          fps = self.font.render(f"FPS:{round(clock.get_fps())}",True,(255,255,255))
@@ -102,6 +103,7 @@ class Level:
         self.game = self.network.send("get")
 
         self.player.update()
+        
         self.gameData["Player"] = self.player.data
 
         self.network.send(str(self.gameData))
@@ -110,7 +112,7 @@ class Level:
             bullets.update()
 
         self.visibleSprites.custom_draw(self.player)
-    
+ 
         try:
             match self.playerID:
                 case 0:

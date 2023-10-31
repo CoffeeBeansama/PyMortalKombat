@@ -94,13 +94,9 @@ class Player(pg.sprite.Sprite):
                 self.frame_index = 0
 
             
-                
-
         self.image = animation[int(self.frame_index)].convert_alpha()
         self.image =  pg.transform.flip(self.image, True, False) if self.flipped else pg.transform.flip(self.image, False, False)
-        self.rect = self.image.get_rect(center=self.hitbox.center)
-
-
+      
     def idleState(self):
         if not self.attacking:
             self.direction.x = 0
