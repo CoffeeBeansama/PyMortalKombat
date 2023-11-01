@@ -82,7 +82,8 @@ class Level:
         self.bullets = []
         self.timer = Timer(200)
         
-        self.objectPool = ObjectPool(self.visibleSprites)
+        self.player1ObjectPool = ObjectPool(self.visibleSprites)
+        self.player2ObjectPool = ObjectPool(self.visibleSprites)
 
 
     def createPlayerBullets(self):
@@ -90,7 +91,7 @@ class Level:
         if not self.timer.activated:
             bulletStartx = player.rect.centerx - 15 if player.flipped else  player.rect.centerx + 15
             bulletStarty = player.rect.centery 
-            self.objectPool.createBullets((bulletStartx,bulletStarty),self.player.flipped)
+            self.player1ObjectPool.createBullets((bulletStartx,bulletStarty),self.player.flipped)
             self.timer.activate()
 
 
@@ -104,8 +105,9 @@ class Level:
         self.game = self.network.send("get")
 
         self.player.update()
-        self.objectPool.update()
+        self.player1ObjectPool.update()
         self.gameData["Player"] = self.player.data
+        self.gameData["Bullets"] = self.player1ObjectPool.data
         
         self.network.send(str(self.gameData))
 
@@ -118,12 +120,19 @@ class Level:
                         if type(self.game.getPlayerTwoData()) == str:
                             data = ast.literal_eval(str(self.game.getPlayerTwoData()))
                             playerData = data["Player"]
+                            bulletData = data["Bullets"]
+                           
+                            self.player2ObjectPool.handlePlayer2Projectiles(bulletData)
                             self.player2.handlePlayer2Movement(playerData["Pos"],playerData["Direction"],playerData["State"],playerData["Flipped"],playerData["Frame Index"],playerData["Attacking"])
                        
                 case 1:
                         if type(self.game.getPlayerOneData()) == str:
                             data = ast.literal_eval(str(self.game.getPlayerOneData()))
                             playerData = data["Player"]
+                            bulletData = data["Bullets"]
+                            
+                            self.player2ObjectPool.handlePlayer2Projectiles(bulletData)
+                           
                             self.player2.handlePlayer2Movement(playerData["Pos"],playerData["Direction"],playerData["State"],playerData["Flipped"],playerData["Frame Index"],playerData["Attacking"])
         except:
             pass

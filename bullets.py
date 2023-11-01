@@ -52,6 +52,9 @@ class Bullet(pg.sprite.Sprite):
         if not self.timer.activated:
             self.timer.activate()
 
+    
+
+
     def deactivateSelf(self):
         self.spawned = False
         self.rect.center = self.poolPos
@@ -65,6 +68,7 @@ class Bullet(pg.sprite.Sprite):
                 self.hitbox.centerx += 1 * speed
                 self.hitbox.centery += 1 * speed
         self.rect.centerx = self.hitbox.centerx
+    
     
     def update(self):
         self.timer.update()
