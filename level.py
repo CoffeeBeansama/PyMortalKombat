@@ -5,7 +5,7 @@ from support import loadSprite
 from settings import screenWidth,screenHeight
 import ast
 from timer import Timer
-from bullets import Bullet
+from pool import ObjectPool
 
 #region Camera
 class CameraGroup(pg.sprite.Group):
@@ -81,15 +81,16 @@ class Level:
 
         self.bullets = []
         self.timer = Timer(200)
+        
+        self.objectPool = ObjectPool(self.visibleSprites)
 
 
     def createPlayerBullets(self):
-         player = self.player
-         if not self.timer.activated:
-            bulletStartx = player.rect.centerx - 30 if player.flipped else  player.rect.centerx + 15
-            bulletStarty = player.rect.centery - 6
-            self.bullets.append(Bullet((bulletStartx,bulletStarty),self.visibleSprites,player.flipped))
-
+        player = self.player
+        if not self.timer.activated:
+            bulletStartx = player.rect.centerx - 15 if player.flipped else  player.rect.centerx + 15
+            bulletStarty = player.rect.centery 
+            self.objectPool.createBullets((bulletStartx,bulletStarty),self.player.flipped)
             self.timer.activate()
 
 
@@ -103,14 +104,12 @@ class Level:
         self.game = self.network.send("get")
 
         self.player.update()
-        
+        self.objectPool.update()
         self.gameData["Player"] = self.player.data
-
+        
         self.network.send(str(self.gameData))
 
-        for bullets in self.bullets:
-            bullets.update()
-
+        
         self.visibleSprites.custom_draw(self.player)
  
         try:
